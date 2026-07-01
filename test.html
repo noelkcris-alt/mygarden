@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Cloud Protocol Test</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; padding: 20px; margin: 0; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 1px solid #333; }
+        h2 { margin-top: 0; color: #ffffff; border-bottom: 2px solid #00ff66; padding-bottom: 8px; font-weight: 400; }
+        label { display: block; margin: 15px 0 5px; color: #aaa; font-size: 14px; text-transform: uppercase; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #444; background: #2a2a2a; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-size: 16px; }
+        input[type="text"]:focus { border-color: #00ff66; outline: none; }
+        button { background-color: #00ff66; color: #000; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 20px; transition: background 0.2s; }
+        button:hover { background-color: #00cc52; }
+        .console { margin-top: 25px; background: #0a0a0a; color: #00ff66; font-family: 'Courier New', monospace; padding: 15px; border-radius: 5px; border: 1px solid #222; max-height: 250px; overflow-y: auto; font-size: 13px; }
+        .log-entry { margin-bottom: 8px; line-height: 1.4; border-left: 3px solid #00ff66; padding-left: 8px; }
+        .log-error { border-left-color: #ff3333; color: #ff3333; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📡 Garden Protocol Cloud Bridge</h2>
+    
+    <label for="protocolMessage">Raw Message Text Input</label>
+    <input type="text" id="protocolMessage" placeholder="Type or paste payload (e.g., 0E0012)" value="0E0012">
+    
+    <button onclick="transmitMessageToCloud()">Send Message to Vercel</button>
+    
+    <label>Live Outgoing Activity Monitor</label>
+    <div class="console" id="liveActivityMonitor">Awaiting transmission initialization...</div>
+</div>
+
+<script>
+async function transmitMessageToCloud() {
+    const messageInput = document.getElementById("protocolMessage").value.trim();
+    const monitor = document.getElementById("liveActivityMonitor");
+    const timestamp = new Date().toLocaleTimeString();
+
+    if (!messageInput) {
+        monitor.innerHTML = `<div class="log-entry log-error">[${timestamp}] Error: Message input is empty!</div>` + monitor.innerHTML;
+        return;
+    }
+
+    // Prepare clean payload matching our testing backend expectations
+    const payload = { rawText: messageInput };
+
+    // Update screen to reflect immediate transit execution status
+    monitor.innerHTML = `<div class="log-entry">[${timestamp}] Sending: "${messageInput}" to Vercel API...</div>` + monitor.innerHTML;
+
+    try {
+        // Sends stateless HTTP POST right back to our backend route
+        const response = await fetch('/api/test-msg', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        const outcome = await response.json();
+
+        if (response.ok && outcome.success) {
+            monitor.innerHTML = `<div class="log-entry" style="color: #00ff66; border-left-color: #00ff66;">[${new Date().toLocaleTimeString()}] ✔ Cloud Synchronized! Saved to key "latest_garden_msg".</div>` + monitor.innerHTML;
+        } else {
+            monitor.innerHTML = `<div class="log-entry log-error">[${new Date().toLocaleTimeString()}] ❌ Server rejected request: ${outcome.error}</div>` + monitor.innerHTML;
+        }
+    } catch (err) {
+        monitor.innerHTML = `<div class="log-entry log-error">[${new Date().toLocaleTimeString()}] ❌ Network Failure: ${err.message}</div>` + monitor.innerHTML;
+    }
+}
+</script>
+
+</body>
+</html>
