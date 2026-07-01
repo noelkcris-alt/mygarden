@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Supabase Cloud Test</title>
+    <style>
+        body { font-family: sans-serif; background-color: #121212; color: #e0e0e0; padding: 20px; }
+        .container { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 25px; border-radius: 8px; border: 1px solid #333; }
+        h2 { margin-top: 0; color: #ffffff; border-bottom: 2px solid #00ff66; padding-bottom: 8px; }
+        label { display: block; margin: 15px 0 5px; color: #aaa; font-size: 14px; text-transform: uppercase; }
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #444; background: #2a2a2a; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-size: 16px; }
+        button { background-color: #00ff66; color: #000; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; margin-top: 20px; }
+        .console { margin-top: 25px; background: #0a0a0a; color: #00ff66; font-family: monospace; padding: 15px; border-radius: 5px; border: 1px solid #222; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📡 Garden Protocol Cloud Bridge (Supabase)</h2>
+    
+    <label for="protocolMessage">Raw Message Text Input</label>
+    <input type="text" id="protocolMessage" placeholder="Type or paste payload" value="0E0012">
+    
+    <button onclick="transmitMessageToSupabase()">Send Message to Cloud</button>
+    
+    <label>Live Activity Monitor</label>
+    <div class="console" id="liveActivityMonitor">Awaiting transmission initialization...</div>
+</div>
+
+<script>
+// REPLACE THESE WITH YOUR EXACT SUPABASE CREDENTIALS FROM YOUR SETTINGS PANEL
+const SUPABASE_URL = "https://tsalfqpvcxyauhhnonog.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzYWxmcXB2Y3h5YXVoaG5vbm9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MTc4MDcsImV4cCI6MjA5ODQ5MzgwN30.STlqr1DZcabM6wd0nJZc40QsMUjojqW-2a-yBYWZqqg";
+
+async function transmitMessageToSupabase() {
+    const messageInput = document.getElementById("protocolMessage").value.trim();
+    const monitor = document.getElementById("liveActivityMonitor");
+    const timestamp = new Date().toLocaleTimeString();
+
+    if (!messageInput) {
+        monitor.innerHTML = `[${timestamp}] Error: Message input is empty!<br>` + monitor.innerHTML;
+        return;
+    }
+
+    monitor.innerHTML = `[${timestamp}] Updating Cloud Data...<br>` + monitor.innerHTML;
+
+    try {
+        // We use an HTTP PATCH request to simply overwrite row ID #1 over and over
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/garden_payloads?id=eq.1`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'apikey': SUPABASE_ANON_KEY,
+                'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
+            },
+            body: JSON.stringify({ message_text: messageInput })
+        });
+
+        if (response.ok) {
+            monitor.innerHTML = `[${new Date().toLocaleTimeString()}] ✔ Persistent Synchronization Successful!<br>` + monitor.innerHTML;
+        } else {
+            monitor.innerHTML = `[${new Date().toLocaleTimeString()}] ❌ Server rejection.<br>` + monitor.innerHTML;
+        }
+    } catch (err) {
+        monitor.innerHTML = `[${new Date().toLocaleTimeString()}] ❌ Network Failure: ${err.message}<br>` + monitor.innerHTML;
+    }
+}
+</script>
+
+</body>
+</html>
