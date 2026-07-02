@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Garden Unified Cloud Control Panel</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; padding: 25px; margin: 0; }
+        .panel { max-width: 650px; margin: 0 auto; background: #1e1e1e; padding: 25px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
+        h2 { margin-top: 0; color: #ffffff; border-bottom: 2px solid #00ff66; padding-bottom: 10px; font-weight: 500; font-size: 22px; }
+        
+        /* Layout Grid */
+        .grid-section { background: #262626; padding: 20px; border-radius: 6px; margin-bottom: 20px; border-left: 5px solid #ffb700; }
+        .grid-write { border-left-color: #00ff66; }
+        
+        .label { font-size: 12px; text-transform: uppercase; color: #aaa; letter-spacing: 1px; margin-bottom: 6px; font-weight: bold; }
+        .live-value { font-family: 'Courier New', monospace; font-size: 28px; color: #ffb700; font-weight: bold; word-break: break-all; }
+        
+        /* Form Styling */
+        input[type="text"] { width: 100%; padding: 12px; border: 1px solid #444; background: #121212; color: #fff; border-radius: 4px; box-sizing: border-box; font-family: monospace; font-size: 16px; margin-bottom: 15px; }
+        input[type="text"]:focus { border-color: #00ff66; outline: none; }
+        button { background-color: #00ff66; color: #000; border: none; padding: 12px 20px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; width: 100%; transition: background 0.2s; }
+        button:hover { background-color: #00cc52; }
+        
+        /* Logger Console */
+        pre { background: #0a0a0a; color: #00ff66; padding: 15px; border-radius: 5px; overflow-x: auto; font-size: 13px; border: 1px solid #222; margin: 0; font-family: monospace; max-height: 150px; }
+        .status-footer { display: flex; justify-content: space-between; font-size: 12px; color: #666; font-family: monospace; margin-top: 15px; }
+        .pulse { display: inline-block; width: 8px; height: 8px; background-color: #00ff66; border-radius: 50%; margin-right: 5px; animation: blink 1.5s infinite; }
+        @keyframes blink { 0% { opacity: 0.2; } 50% { opacity: 1; } 100% { opacity: 0.2; } }
+    </style>
+</head>
+<body>
+
+<div class="panel">
+    <h2>📋 Garden Unified Cloud Controller</h2>
+    
+    <!-- SECTION 1: THE GET (READ) LAYER -->
+    <div class="grid-section">
+        <div class="label">📡 Current Active Cloud Payload (From Supabase)</div>
+        <div id="liveCloudPayload" class="live-value">Fetching cloud state...</div>
+    </div>
+
+    <!-- SECTION 2: THE UPDATE (WRITE) LAYER -->
+    <div class="grid-section grid-write">
+        <div class="label">✍️ Modify Cloud Payload</div>
+        <input type="text" id="payloadInput" placeholder="Type or paste payload (e.g., 0E0012)" value="0E0012">
+        <button onclick="updateCloudPayload()">Push Update to Cloud</button>
+    </div>
+
+    <!-- SECTION 3: SYSTEM DIAGNOSTIC VIEWER -->
+    <div class="label">💻 Local Terminal Operations Log</div>
+    <pre id="terminalLog">Initializing localhost data pipelines...</pre>
+
+    <div class="status-footer">
+        <div>Table: <span style="color: #aaa;">garden_payloads (ID 1)</span></div>
+        <div><span class="pulse"></span> Sync: <span id="syncTime" style="color: #aaa;">--:--:--</span></div>
+    </div>
+</div>
+
+<script>
+// --- CONFIGURE YOUR CREDENTIALS ---
+const SUPABASE_URL = "https://tsalfqpvcxyauhhnonog.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzYWxmcXB2Y3h5YXVoaG5vbm9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MTc4MDcsImV4cCI6MjA5ODQ5MzgwN30.STlqr1DZcabM6wd0nJZc40QsMUjojqW-2a-yBYWZqqg";
+
+// Standard targets optimized for high speed read/write
+const fetchUrl = `${SUPABASE_URL}/rest/v1/garden_payloads?id=eq.1&select=message_text`;
+const updateUrl = `${SUPABASE_URL}/rest/v1/garden_payloads?id=eq.1`;
+
+const headersBlock = {
+    'apikey': SUPABASE_ANON_KEY,
+    'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
+    'Content-Type': 'application/json'
+};
+
+// ==========================================
+// 1. THE GET FUNCTION (Runs every 3 seconds)
+// ==========================================
+async function readCloudDatabase() {
+    try {
+        const response = await fetch(fetchUrl, { method: 'GET', headers: headersBlock });
+        if (response.ok) {
+            const dataArray = await response.json();
+            if (dataArray && dataArray.length > 0) {
+                // Update the large active text tracking card
+                document.getElementById("liveCloudPayload").innerText = dataArray[0].message_text;
+                document.getElementById("syncTime").innerText = new Date().toLocaleTimeString();
+            }
+        }
+    } catch (err) {
+        logToTerminal(`Read Error: ${err.message}`);
+    }
+}
+
+// ==========================================
+// 2. THE UPDATE FUNCTION (Runs on click)
+// ==========================================
+async function updateCloudPayload() {
+    const inputField = document.getElementById("payloadInput");
+    const newString = inputField.value.trim();
+    const timestamp = new Date().toLocaleTimeString();
+
+    if (!newString) {
+        logToTerminal(`[${timestamp}] ❌ Update aborted: Input is empty.`);
+        return;
+    }
+
+    logToTerminal(`[${timestamp}] ⏳ Requesting PATCH execution...`);
+
+    try {
+        const response = await fetch(updateUrl, {
+            method: 'PATCH',
+            headers: headersBlock,
+            body: JSON.stringify({ message_text: newString })
+        });
+
+        if (response.ok) {
+            logToTerminal(`[${new Date().toLocaleTimeString()}] ✔ Cloud updated successfully to: "${newString}"`);
+            // Instantly refresh the reading card to show the modification with no lag
+            readCloudDatabase(); 
+        } else {
+            const errBody = await response.text();
+            logToTerminal(`[${new Date().toLocaleTimeString()}] ❌ Refused: ${response.status} - ${errBody}`);
+        }
+    } catch (err) {
+        logToTerminal(`[${new Date().toLocaleTimeString()}] ❌ Network Exception: ${err.message}`);
+    }
+}
+
+// Helper utility to handle terminal rolling logging data on screen
+function logToTerminal(message) {
+    const term = document.getElementById("terminalLog");
+    term.innerHTML = message + "\n" + term.innerHTML;
+}
+
+// Start continuous loop synchronization operations
+readCloudDatabase();
+setInterval(readCloudDatabase, 5000);
+</script>
+
+</body>
+</html>
