@@ -184,8 +184,6 @@ if (timeInput && document.activeElement !== timeInput) timeInput.value = formatt
 	 console.error("Database sync pull failed:", err);}
 }
 // eof  performDatabasePullSynchronization()
- window.processInstantModeSliderAutoSubmit = async function(hubId, channelId, val) {
-}};
 window.processInstantModeSliderAutoSubmit = async function(hubId, channelId, val) {
     updateVisualSliderTextLabels(hubId, channelId, val);
     let compiledModeString = "";
