@@ -212,28 +212,52 @@ window.processInstantModeSliderAutoSubmit = async function(hubId, channelId, val
 };
 
 // eof
-	 window.processManualScheduleSubmission = async function(hubId, channelId) {
-		 let compiledSchedStr = "";
-	 for (let sked = 0; sked < 4; sked++) {
-		 const inputElement = document.getElementById(T${hubId}${channelId}${sked});
-		 const val = inputElement ? inputElement.value : "";
-		 if (!val) {logToTerminal(`❌ Input Error: Time fields cannot be blank.`);
-		 return;}
-		 compiledSchedStr += val.replace(":", "");}
-	 const cleanSchedValue = String(compiledSchedStr).trim();
-	 const targetColumnName = sk${channelId};
-	 logToTerminal(`[Cloud] Patching Column [${targetColumnName}] for Hub #${hubId}...`);
-	 try {const response = await fetch(${SUPABASE_URL}/rest/v1/slaves?id_num=eq.${hubId}, {
-		 method: 'PATCH',headers: apiHeaders,body: JSON.stringify({ [targetColumnName]: cleanSchedValue })});
-		 if (response.ok) logToTerminal(`✔ Schedule saved to cloud!`);
-	 } catch (err) {
-		 console.error("Schedule save failed:", err);}
-		 };
-	 function updateVisualSliderTextLabels(hub, ch, value) {
-		 const label = document.getElementById(lbl_E${hub}${ch});
-		 if (!label) return;
-		 label.className = "mode-lbl";
-		 if (value === "0") { label.innerText = "OFF"; label.classList.add("lbl-off"); }
-			 else if (value === "1") { label.innerText = "Auto"; label.classList.add("lbl-auto"); }
-			 else if (value === "2") { label.innerText = "ON"; label.classList.add("lbl-on"); }
-	}
+window.processManualScheduleSubmission = async function(hubId, channelId) {
+    let compiledSchedStr = "";
+    for (let sked = 0; sked < 4; sked++) {
+        // FIX: Replaced broken syntax with direct string concatenation for the element ID
+        const inputElement = document.getElementById("T" + hubId + channelId + sked);
+        const val = inputElement ? inputElement.value : "";
+        if (!val) {
+            logToTerminal(`❌ Input Error: Time fields cannot be blank.`);
+            return;
+        }
+        compiledSchedStr += val.replace(":", "");
+    }
+    
+    const cleanSchedValue = String(compiledSchedStr).trim();
+    // FIX: Replaced bare token with a clean concatenated string identifier
+    const targetColumnName = "sk" + channelId;
+    
+    logToTerminal(`[Cloud] Patching Column [${targetColumnName}] for Hub #${hubId}...`);
+    
+    // FIX: Enclosed the dynamic endpoint string template inside backticks (``)
+    const targetUrl = `${SUPABASE_URL}/rest/v1/system_sync?id=eq.${hubId}`;
+    
+    try {
+        const response = await fetch(`${SUPABASE_URL}/rest/v1/slaves?id_num=eq.${hubId}`, {
+            method: 'PATCH',
+            headers: apiHeaders,
+            body: JSON.stringify({ [targetColumnName]: cleanSchedValue })
+        });
+        if (response.ok) logToTerminal(`✔ Schedule saved to cloud!`);
+    } catch (err) {
+        console.error("Schedule save failed:", err);
+    }
+};
+
+function updateVisualSliderTextLabels(hub, ch, value) {
+    const label = document.getElementById("lbl_E" + hub + ch); 
+    if (!label) return;
+    label.className = "mode-lbl";
+    if (value === "0") { 
+        label.innerText = "OFF"; 
+        label.classList.add("lbl-off"); 
+    } else if (value === "1") { 
+        label.innerText = "Auto"; 
+        label.classList.add("lbl-auto"); 
+    } else if (value === "2") { 
+        label.innerText = "Always On"; 
+        label.classList.add("lbl-on"); 
+    }
+}
