@@ -74,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     generateDynamicHtmlLayoutStructure();
     setInterval(getCleanLocalFormattedTimeString, 1000);
     await transmitWebStartupHandshake();
-    logToTerminal("[Init] Downloading operational master configurations from cloud...");
+    logToTerminal(`[Init] Downloading operational master configurations from cloud...`);
     await performDatabasePullSynchronization();
     setInterval(performDatabasePullSynchronization, 4000);
     setInterval(executeRoutineGlobalTimeSync, 300000);
@@ -211,23 +211,21 @@ window.processInstantModeSliderAutoSubmit = async function(hubId, channelId, val
     }
 };
 
-
-
 // eof
 	 window.processManualScheduleSubmission = async function(hubId, channelId) {
 		 let compiledSchedStr = "";
 	 for (let sked = 0; sked < 4; sked++) {
 		 const inputElement = document.getElementById(T${hubId}${channelId}${sked});
 		 const val = inputElement ? inputElement.value : "";
-		 if (!val) {logToTerminal("❌ Input Error: Time fields cannot be blank.");
+		 if (!val) {logToTerminal(`❌ Input Error: Time fields cannot be blank.`);
 		 return;}
 		 compiledSchedStr += val.replace(":", "");}
 	 const cleanSchedValue = String(compiledSchedStr).trim();
 	 const targetColumnName = sk${channelId};
-	 logToTerminal([Cloud] Patching Column [${targetColumnName}] for Hub #${hubId}...);
+	 logToTerminal(`[Cloud] Patching Column [${targetColumnName}] for Hub #${hubId}...`);
 	 try {const response = await fetch(${SUPABASE_URL}/rest/v1/slaves?id_num=eq.${hubId}, {
 		 method: 'PATCH',headers: apiHeaders,body: JSON.stringify({ [targetColumnName]: cleanSchedValue })});
-		 if (response.ok) logToTerminal("✔ Schedule saved to cloud!");
+		 if (response.ok) logToTerminal(`✔ Schedule saved to cloud!`);
 	 } catch (err) {
 		 console.error("Schedule save failed:", err);}
 		 };
