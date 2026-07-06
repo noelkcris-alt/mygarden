@@ -185,17 +185,37 @@ if (timeInput && document.activeElement !== timeInput) timeInput.value = formatt
 }
 // eof  performDatabasePullSynchronization()
  window.processInstantModeSliderAutoSubmit = async function(hubId, channelId, val) {
-		 updateVisualSliderTextLabels(hubId, channelId, val);
-	 let compiledModeString = "";
-	 for (let ch = 0; ch < 4; ch++) {
-		 const sliderElement = document.getElementById(E${hubId}${ch});
-		 compiledModeString += sliderElement ? sliderElement.value : "1";}
-	 const cleanStringValue = String(compiledModeString).trim();
-	 logToTerminal([Cloud] Patching Modes: "${cleanStringValue}" for Hub #${hubId}...);
-	 try {await fetch(${SUPABASE_URL}/rest/v1/slaves?id_num=eq.${hubId}, {
-		 method: 'PATCH',headers: apiHeaders,body: JSON.stringify({ mode: cleanStringValue })});
-		 } catch (err) {console.error("Slider save failed:", err);
-		 }};
+}};
+window.processInstantModeSliderAutoSubmit = async function(hubId, channelId, val) {
+    updateVisualSliderTextLabels(hubId, channelId, val);
+    let compiledModeString = "";
+    for (let ch = 0; ch < 4; ch++) {
+        // FIX: Wrapped the dynamic element ID selector inside standard string quotes
+        const sliderElement = document.getElementById("E" + hubId + ch); 
+        compiledModeString += sliderElement ? sliderElement.value : "1";
+    }
+    
+    const cleanStringValue = String(compiledModeString).trim();
+    // FIX: Wrapped the console string template inside clean backticks (``)
+    logToTerminal(`[Cloud] Patching Modes: "${cleanStringValue}" for Hub #${hubId}...`);
+    
+    // FIX: Wrapped the dynamic query path URL inside clean backticks (``)
+    const targetUrl = `${SUPABASE_URL}/rest/v1/slaves?id_num=eq.${hubId}`;
+    
+    try {
+        await fetch(targetUrl, {
+            method: 'PATCH',
+            headers: apiHeaders,
+            body: JSON.stringify({ mode: cleanStringValue })
+        });
+    } catch (err) {
+        console.error("Slider save failed:", err);
+    }
+};
+
+
+
+// eof
 	 window.processManualScheduleSubmission = async function(hubId, channelId) {
 		 let compiledSchedStr = "";
 	 for (let sked = 0; sked < 4; sked++) {
