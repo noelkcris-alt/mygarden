@@ -1,6 +1,8 @@
 // app.js - Automated Layout Compilation & Cloud Synchronization Engine
-const SUPABASE_URL = "https://supabase.co";
-const SUPABASE_ANON_KEY = "PASTE_YOUR_SUPABASE_ANON_PUBLIC_KEY_HERE";
+// REPLACE THESE WITH YOUR EXACT SUPABASE CREDENTIALS FROM YOUR SETTINGS PANEL
+const SUPABASE_URL = "https://tsalfqpvcxyauhhnonog.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzYWxmcXB2Y3h5YXVoaG5vbm9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MTc4MDcsImV4cCI6MjA5ODQ5MzgwN30.STlqr1DZcabM6wd0nJZc40QsMUjojqW-2a-yBYWZqqg";
+
 
 // Standard direct table API routing headers
 const apiHeaders = {
