@@ -311,3 +311,43 @@ document.addEventListener("DOMContentLoaded", async () => {
     // Setup background interval loop to fire the periodic "T" update every 5 minutes (300,000 ms)
     setInterval(executeRoutineGlobalTimeSync, 300000);
 });
+
+// =====================================================================
+// FRONT-END USER INTERFACE TIME RECOVERY & DIGITAL CLOCK MATRIX
+// =====================================================================
+
+// 1. Compiles your local system clock into your strict 6-digit space-free code string format (Ex: "175022")
+function getCleanLocalFormattedTimeString() {
+    const now = new Date();
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mm = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    
+    // --- VISUAL SYNCHRONIZATION: Update the on-screen clock text box dynamically ---
+    const clockElement = document.getElementById("liveClockDisplay");
+    if (clockElement) {
+        // Formats beautifully for human reading on your desktop monitor
+        const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+        const displayHours = String(now.getHours() % 12 || 12).padStart(2, '0');
+        clockElement.innerText = `${displayHours}:${mm}:${ss} ${ampm}`;
+    }
+    // --------------------------------------------------------------------------------
+    
+    return `${hh}${mm}${ss}`; // Returns the raw 6-digit text string variable for database transmission
+}
+
+// Hook the clock ticker loop right into your document loading lifecycle
+document.addEventListener("DOMContentLoaded", async () => {
+    // Generate layout forms programmatically
+    generateDynamicHtmlLayoutStructure();
+    
+    // --- ADD THIS TICKER TIMER: Updates your visual on-screen clock every 1 second (1000ms) ---
+    setInterval(getCleanLocalFormattedTimeString, 1000);
+    // -----------------------------------------------------------------------------------------
+    
+    // Fire your unspilled startup time synchronization event instantly on page open
+    await transmitWebStartupHandshake();
+    
+    // Setup background interval loop to fire the periodic "T" update every 5 minutes (300,000 ms)
+    setInterval(executeRoutineGlobalTimeSync, 300000);
+});
