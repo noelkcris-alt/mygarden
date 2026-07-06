@@ -2,6 +2,12 @@
 const SUPABASE_URL = "https://tsalfqpvcxyauhhnonog.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRzYWxmcXB2Y3h5YXVoaG5vbm9nIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODI5MTc4MDcsImV4cCI6MjA5ODQ5MzgwN30.STlqr1DZcabM6wd0nJZc40QsMUjojqW-2a-yBYWZqqg";
 // =====================================================================
+// SECURITY INTERCEPTION LAYER (PREVENTS RIGHT-CLICK CONTEXT MENU)
+// =====================================================================
+document.addEventListener('contextmenu', function(event) {
+    event.preventDefault(); // Blocks the default context menu from popping up
+});
+// =====================================================================
 // FRONT-END GLOBAL CONFIGURATIONS & API ACCESS CHANNELS
 // =====================================================================
 const apiHeaders = {
