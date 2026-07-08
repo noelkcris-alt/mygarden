@@ -64,15 +64,16 @@ window.db_get = async function(targetPrefixLetter) {
                 }
             } 
 			// --- FIND THIS INSIDE YOUR db_interface.js FILE TAB (Around line 65) ---
+         // --- FIND THIS SPECIFIC BLOCK INSIDE YOUR db_interface.js FILE TAB (Around Line 66) ---
             else if (targetPrefixLetter === "V") {
-                // --- FIXED: ALIGNED FUNCTION HOOK NAME TO PREVENT SILENT DROPOUTS ---
-                if (typeof unpackAndDistributeHardwarePayload === "function") {
-                    const parseSuccess = unpackAndDistributeHardwarePayload(currentCmdString);
-                    if (parseSuccess) await db_update("I"); // Clear row to Idle cleanly
+                // --- FIXED: ROUTE TELEMETRY STRINGS TO THE CORRECT DEDICATED BATTERY PARSER FUNCTION ---
+                if (typeof unpackAndDistributeBatteryTelemetryPayload === "function") {
+                    const parseSuccess = unpackAndDistributeBatteryTelemetryPayload(currentCmdString);
+                    if (parseSuccess) await db_update("I"); // Clear the mailbox cell back to Idle safely
                 }
-                // -------------------------------------------------------------------
+                // -------------------------------------------------------------------------------------
             } 
-/*
+
             else if (targetPrefixLetter === "Q") {
                 if (typeof unpackAndDistributeBatteryTelemetryPayload === "function") {
                     const parseSuccess = unpackAndDistributeBatteryTelemetryPayload(currentCmdString);
