@@ -73,7 +73,7 @@ window.db_get = async function(targetPrefixLetter) {
                 }
                 // -------------------------------------------------------------------------------------
             } 
-
+/*
             else if (targetPrefixLetter === "Q") {
                 if (typeof unpackAndDistributeBatteryTelemetryPayload === "function") {
                     const parseSuccess = unpackAndDistributeBatteryTelemetryPayload(currentCmdString);
