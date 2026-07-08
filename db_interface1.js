@@ -42,7 +42,8 @@ async function db_update(commandString) {
 
 // 3. --- FIX: ACCEPT AN EXPLICIT PREFIX LETTER FILTER AS A LOOP PARAMETER ---
 // TARGETED CLOUD EXTRACTION LAYER: Polling engine with explicit prefix parameter filters
-async function db_get(targetPrefixLetter) {
+// --- BIND FUNCTION EXPLICITLY TO GLOBAL BROWSER WINDOW RESILIENCE LAYERS ---
+window.db_get = async function(targetPrefixLetter) {
     try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/lastcmd?id=eq.1&select=cmd`, { 
             method: 'GET', headers: apiHeaders 
@@ -52,28 +53,37 @@ async function db_get(targetPrefixLetter) {
         const data = await res.json();
         if (!data || data.length === 0) return null;
         
-        // --- FIXED: Extracts row index 0 out of the Supabase data array block wrapper ---
-        const currentCmdString = data[0] && data[0].cmd ? data[0].cmd.trim() : "";
+        // Target row index 0 out of the returned postgres array block wrapper safely
+        const currentCmdString = data && data.cmd ? data.cmd.trim() : "";
         
-        // Match condition checks if the incoming mailbox matches your specific target letter ('N' or 'B')
         if (currentCmdString.charAt(0) === targetPrefixLetter) {
             console.log(`[DB Inbound] Intercepted Matching Target Command '${targetPrefixLetter}': "${currentCmdString}"`);
             
-            if (typeof unpackAndDistributeHardwarePayload === "function") {
-                const parseSuccess = unpackAndDistributeHardwarePayload(currentCmdString);
-                
-                if (parseSuccess) {
-                    await db_update("I"); // Clear the mailbox cell back to Idle
+            // Route down based on letter categories (T vs V vs B)
+            if (targetPrefixLetter === "V") {
+                if (typeof unpackAndDistributeBatteryTelemetryPayload === "function") {
+                    unpackAndDistributeBatteryTelemetryPayload(currentCmdString);
+                    await db_update("I"); // Clear the mailbox line cell instantly
+                }
+            } else if (targetPrefixLetter === "N") {
+                if (typeof unpackAndDistributeHardwarePayload === "function") {
+                    unpackAndDistributeHardwarePayload(currentCmdString);
+                    await db_update("I"); // Clear the mailbox line cell instantly
+                }
+            } else if (targetPrefixLetter === "E" || targetPrefixLetter === "K") {
+                if (typeof unpackAndDistributeHardwarePayload === "function") {
+                    unpackAndDistributeHardwarePayload(currentCmdString);
+                    await db_update("I"); // Clear the mailbox line cell instantly
                 }
             }
         }
-        
         return currentCmdString;
     } catch (err) {
         console.error(`db_get('${targetPrefixLetter}') transaction failed:`, err);
         return null;
     }
-}
+};
+
 
 // =====================================================================
 // AUTOMATED RUNNING BACKGROUND TIMING LOOP
