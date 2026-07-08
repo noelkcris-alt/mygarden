@@ -75,14 +75,26 @@ async function db_get(targetPrefixLetter) {
     }
 }
 
-// 4. AUTOMATED RUNNING BACKGROUND TIMING LOOP
+// =====================================================================
+// AUTOMATED RUNNING BACKGROUND TIMING LOOP
+// =====================================================================
 setInterval(async () => {
-    // Once the entire layout panel reveals and logs in successfully...
+    // Only execute network traffic passes if the main UI is completely unmasked and running
     if (window.isPageInitializedAndVisible) {
-        // --- FIX: CONTINUOUSLY MONITOR ONLY FOR 'B' (BATTERY/TELEMETRY) UPDATE MESSAGES ---
-        await db_get("B");
+        
+        // 1. TELEMETRY MONITORING: Passively harvest incoming 'V' and 'N' packets from the master gateway
+        // This drives your on-screen battery gauges and initializes panel states
+        await db_get("V");
+        await db_get("N");
+
+        // 2. SERIAL SYNC MONITORING: Passively listen for 'E' and 'K' commands typed into the Serial Monitor
+        // This instantly catches manual keyboard overrides and moves your on-screen UI sliders to match
+        await db_get("E");
+        await db_get("K");
     }
 }, 2000); // 2-second background check cycle to maintain high network stability
+
+
 
 // =====================================================================
 // STANDALONE VOLTAGE TELEMETRY UNPACKER & DUAL-METER ROUTING MATRIX
