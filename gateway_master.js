@@ -1,8 +1,8 @@
 // =====================================================================
-// GATEWAY_MASTER.JS - CORRECTED SMARTPHONE COMPONENTS CONTROLLER
+// GATEWAY_MASTER.JS - EXTENDED LIFECYCLE EVENT CONTROLLER Engine
 // =====================================================================
 
-const HUB_NAMES = ["ESP01SA", "ESP01SB", "ESP01SC", "ESP01SX"];
+window.HUB_NAMES = ["ESP01SA", "ESP01SB", "ESP01SC", "ESP01SX"];
 let activeHubTab = 0;
 window.isPageInitializedAndVisible = false;
 
@@ -10,7 +10,7 @@ window.isPageInitializedAndVisible = false;
 window.userInteractionLockActive = false;
 window.interactionLockTimerReference = null;
 
-function getCleanLocalFormattedTimeString() {
+window.getCleanLocalFormattedTimeString = function() {
     const now = new Date();
     const hh = String(now.getHours()).padStart(2, '0');
     const mm = String(now.getMinutes()).padStart(2, '0');
@@ -23,9 +23,9 @@ function getCleanLocalFormattedTimeString() {
         clockElement.innerText = `${paddedDisplayHours}:${mm}:${ss} ${ampm}`;
     }
     return `${hh}${mm}${ss}`;
-}
+};
 
-// INTERACTION PROTECTION GUARD HOOK
+// 🌟 INTERACTION PROTECTION GUARD HOOK
 window.activateShieldRaceGuard = function() {
     window.userInteractionLockActive = true;
     if (window.interactionLockTimerReference) {
@@ -37,25 +37,22 @@ window.activateShieldRaceGuard = function() {
     }, 4000);
 };
 
-// LIFECYCLE INITIALIZER HANDSHAKE
-document.addEventListener("DOMContentLoaded", async () => {
-    // Generate your custom smartphone cards dynamically first in synchronous tracking execution
-    generateDynamicHtmlLayoutStructure();
+// 🌟 INITIALIZE LIFECYCLE CHANNELS UPON SECURE USER AUTHENTICATION MATCH
+window.startSystemRuntimeClockLifecycle = function() {
+    console.log("[Authorized Launch] Firing system clock pipelines and network tracking sweeps...");
     
-    getCleanLocalFormattedTimeString();
-    setInterval(getCleanLocalFormattedTimeString, 1000);
+    window.getCleanLocalFormattedTimeString();
+    setInterval(window.getCleanLocalFormattedTimeString, 1000);
     
-    // Compile active real-time time parameter variables
-    const timePayload = getCleanLocalFormattedTimeString();
+    const timePayload = window.getCleanLocalFormattedTimeString();
     
-    // Mask fields hidden until hardware registers check-in strings on Row 1 cache channel
+    // Hide panels until the ESP registers its reply check string on Row 1
     document.getElementById("hubTablesWorkspace").style.display = "none";
     document.getElementById("tabBarContainer").style.display = "none";
     document.getElementById("subGaugesContainer").style.display = "none";
     
-    // Drop the initial handshake request over Row 3 control lane safely
     if (typeof window.db_init === "function") {
-        await window.db_init(timePayload);
+        window.db_init(timePayload);
     }
 
     // Sweep Row 1 for incoming hardware check-in reply data blocks
@@ -69,7 +66,7 @@ document.addEventListener("DOMContentLoaded", async () => {
             }
         }
     }, 1500);
-});
+};
 
 function logToTerminal(msg) {
     const term = document.getElementById("terminalLog");
@@ -115,7 +112,7 @@ window.processManualScheduleSubmission = async function(hubId, channelId) {
     }
 };
 
-function generateDynamicHtmlLayoutStructure() {
+window.generateDynamicHtmlLayoutStructure = function() {
     const tabsContainer = document.getElementById("tabBarContainer");
     const workspace = document.getElementById("hubTablesWorkspace");
     if (!tabsContainer || !workspace) return;
@@ -123,14 +120,11 @@ function generateDynamicHtmlLayoutStructure() {
     let tabsHtml = ""; let workspaceHtml = "";
     for (let hub = 0; hub < 4; hub++) {
         const activeClass = (hub === 0) ? "active" : "";
-        
-        // --- 🌟 FIXED LOWERCASE TARGET MATCHING HOOKS PARSER RE-ALIGNMENT ---
-        tabsHtml += `<button class="tab-btn ${activeClass}" id="btnHub${hub}" onclick="window.switchActiveHubPanel(${hub})">${HUB_NAMES[hub]}</button>`;
+        tabsHtml += `<button class="tab-btn ${activeClass}" id="btnHub${hub}" onclick="window.switchActiveHubPanel(${hub})">${window.HUB_NAMES[hub]}</button>`;
         
         workspaceHtml += `
             <div class="hub-content ${activeClass}" id="panelHub${hub}">
                 <table id="table_hub_${hub}">`;
-        // --------------------------------------------------------------------
                 
         for (let ch = 0; ch < 4; ch++) {
             workspaceHtml += `
@@ -152,7 +146,7 @@ function generateDynamicHtmlLayoutStructure() {
     }
     tabsContainer.innerHTML = tabsHtml;
     workspace.innerHTML = workspaceHtml;
-}
+};
 
 window.switchActiveHubPanel = function(idx) {
     activeHubTab = idx;
