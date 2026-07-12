@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Garden 4-Hub Daily Irrigation Hub Controller</title>
+    
+    <!-- EMBED THE OFFICIAL SUPABASE AUTH ENGINE CLIENT LAYER SDK NATIVELY -->
+    <script src="https://jsdelivr.net"></script>
+    
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; padding: 10px; margin: 0; font-size: 14px; }
         .panel { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.6); }
@@ -22,93 +26,103 @@
         .gauge-status-cell span { display: block; font-weight: bold; margin-bottom: 3px; font-size: 8px; color: #666; font-family: monospace; letter-spacing: 0.3px; }
         .gauge-val-readout { display: block; font-size: 11px; font-family: monospace; font-weight: bold; margin-bottom: 2px; transition: color 0.3s ease; }
         
-        /* Hub Content Panel Visibility Constraints */
         .hub-content { display: none; } 
         .hub-content.active { display: block; }
         
-        /* Irrigation Grid Formatting Matrix */
         table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; background: #181818; }
         td { border: 1px solid #2d2d2d; padding: 10px 6px; text-align: center; vertical-align: middle; }
         .channel-header { background: #262626; color: #00ff66; font-weight: bold; text-align: left; padding-left: 12px; font-size: 13px; text-transform: uppercase; padding: 8px; }
         .mode-row { background: #1f2d1f; }
         
-        /* Input Component Parameter Wrappers */
         input[type="time"] { background: #121212; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: monospace; font-size: 13px; width: 68px; text-align: center; }
         input[type="time"]:focus { border-color: #00ff66; outline: none; }
         input[type="range"] { width: 80px; cursor: pointer; accent-color: #00ff66; vertical-align: middle; }
         .mode-lbl { font-weight: bold; font-size: 12px; min-width: 65px; display: inline-block; vertical-align: middle; }
         .lbl-off { color: #ff3333; } .lbl-auto { color: #ffb700; } .lbl-on { color: #00ff66; }
         
-        /* Action Elements */
         button.submit-btn { background: #00ff66; color: #000; border: none; padding: 8px 4px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 11px; text-transform: uppercase; width: 100%; }
         button.submit-btn:hover { background: #00cc52; }
-        hr { border: 0; border-top: 1px solid #333; margin: 15px 0; }
         
-        /* HTML5 Meter Element Custom Webkit Rendering Overrides */
         meter { width: 100%; height: 8px; display: block; margin: 2px auto 0 auto; border-radius: 2px; background: #111; border: none; -webkit-appearance: none; appearance: none; }
         meter::-webkit-meter-bar { background: #111; border: none; border-radius: 2px; height: 8px; }
         
-        /* Direct Webkit Value Injection rules change the slider colors live */
         meter.meter-green::-webkit-meter-value { background: #00ff66 !important; box-shadow: 0 0 4px #00ff66; }
         meter.meter-yellow::-webkit-meter-value { background: #ffcc00 !important; box-shadow: 0 0 4px #ffcc00; }
         meter.meter-red::-webkit-meter-value { background: #ff3333 !important; box-shadow: 0 0 4px #ff3333; }
         
-        /* 🌟 FIXED: ADVANCED CSS INTERIOR-VALUE SHADOW SELECTOR INJECTS DYNAMIC PULSATING CHROMA CHANGES */
         @keyframes meterValueCriticalPulse {
             0% { background-color: #ff3333; box-shadow: 0 0 2px #ff3333; filter: brightness(1); }
             50% { background-color: #550000; box-shadow: 0 0 10px #ff3333; filter: brightness(1.4); }
             100% { background-color: #ff3333; box-shadow: 0 0 2px #ff3333; filter: brightness(1); }
         }
-        meter.pulse-critical-bar::-webkit-meter-value {
-            animation: meterValueCriticalPulse 1.2s infinite ease-in-out !important;
-        }
+        meter.pulse-critical-bar::-webkit-meter-value { animation: meterValueCriticalPulse 1.2s infinite ease-in-out !important; }
 
-        /* Full Page Loading Splash Indicator Wall */
-        #loadingSplash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; font-family: monospace; color: #00ff66; font-size: 16px; }
+        /* 🔒 DOCK-GATED PORTAL AUTHENTICATION MODAL WALL LAYOUT */
+        #authPortalModalCard { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 99999; font-family: sans-serif; padding: 15px; }
+        .auth-box { width: 100%; max-width: 320px; background: #1e1e1e; padding: 25px 20px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 10px 25px rgba(0,0,0,0.5); text-align: center; }
+        .auth-input { width: 100%; background: #121212; color: #fff; border: 1px solid #444; padding: 10px; margin-bottom: 12px; border-radius: 4px; font-size: 14px; outline: none; box-sizing: border-box; }
+        .auth-input:focus { border-color: #00ff66; }
+        .auth-btn { width: 100%; background: #00ff66; color: #000; border: none; padding: 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 13px; text-transform: uppercase; margin-top: 5px; box-sizing: border-box; }
+        .auth-btn:hover { background: #00cc52; }
+        .auth-error { color: #ff3333; font-size: 12px; margin-top: 10px; font-weight: bold; min-height: 16px; font-family: monospace; }
+        
+        #loadingSplash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; font-family: monospace; color: #00ff66; font-size: 16px; display: none; }
         .spinner { border: 3px solid #222; border-top: 3px solid #00ff66; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin-bottom: 12px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
 
-    <!-- ⌛ SPLASH LOADING COVERS -->
+    <!-- 🔒 SMARTPHONE LOGIN SECURITY OVERLAY WALL -->
+    <div id="authPortalModalCard">
+        <div class="auth-box">
+            <div style="font-size: 32px; margin-bottom: 10px;">🔐</div>
+            <h3 style="margin: 0 0 15px 0; color: #fff; font-weight: 500;">Console Security Lock</h3>
+            <input type="email" id="loginEmailField" class="auth-input" placeholder="User Account / Email">
+            <input type="password" id="loginPasswordField" class="auth-input" placeholder="Security Password">
+            <button class="auth-btn" onclick="window.executeSecureConsoleLoginPass()">Unlock Terminal</button>
+            <div id="authAlertWidget" class="auth-error"></div>
+        </div>
+    </div>
+
+    <!-- ⌛ INITIAL LOADING SYNC SCREEN LAYER -->
     <div id="loadingSplash">
         <div class="spinner"></div>
         <div>CONNECTING TO IRRIGATION MESH...</div>
     </div>
 
-    <div class="panel">
-        <div style="text-align: center; margin-bottom: 10px; font-family: monospace; font-size: 13px; color: #aaa;">
-            🖥️ Current Time: <span id="liveClockDisplay" style="color: #00ff66; font-weight: bold;">00:00:00 AM</span>
-        </div>
-
-        <h2>🌳 Garden Cloud Irrigation Hub Controller</h2>
-
-        <!-- Touch-Friendly Navigation System -->
-        <div class="tab-container-block">
-            <!-- 1. Clickable Tab Menu Elements Bar -->
-            <div class="tab-bar" id="tabBarContainer" style="display: none;"></div>
-            
-            <!-- 2. TELEMETRY MONITOR BAR BRACKETS BOTH MASTER AND NODE METERS FLUIDLY -->
-            <div class="gauges-sub-bar" id="subGaugesContainer" style="display: none;">
-                <div class="gauge-status-cell" id="masterBatteryCard"><span>MASTER</span><b id="masterAdcText" class="gauge-val-readout">-- ADC</b><meter id="masterMeter" min="0" max="1023" value="0"></meter></div>
-                <div class="gauge-status-cell" id="cell_H0"><span>NODE 0</span><b id="txt_H0" class="gauge-val-readout">-- ADC</b><meter id="met0" min="0" max="1023" value="0"></meter></div>
-                <div class="gauge-status-cell" id="cell_H1"><span>NODE 1</span><b id="txt_H1" class="gauge-val-readout">-- ADC</b><meter id="met1" min="0" max="1023" value="0"></meter></div>
-                <div class="gauge-status-cell" id="cell_H2"><span>NODE 2</span><b id="txt_H2" class="gauge-val-readout">-- ADC</b><meter id="met2" min="0" max="1023" value="0"></meter></div>
-                <div class="gauge-status-cell" id="cell_H3"><span>NODE 3</span><b id="txt_H3" class="gauge-val-readout">-- ADC</b><meter id="met3" min="0" max="1023" value="0"></meter></div>
+    <!-- MAIN WEB INTERFACE DASHBOARD WRAPPER APP FRAME -->
+    <div id="securedConsoleWorkspace" style="display: none; opacity: 0; transition: opacity 0.4s ease;">
+        <div class="panel">
+            <div style="text-align: center; margin-bottom: 10px; font-family: monospace; font-size: 13px; color: #aaa;">
+                🖥️ Current Time: <span id="liveClockDisplay" style="color: #00ff66; font-weight: bold;">00:00:00 AM</span>
+                <span style="float: right; color: #ff3333; cursor: pointer; font-weight: bold; margin-right: 5px;" onclick="window.executeConsoleLogoutSecure()">[LOGOUT]</span>
             </div>
-        </div>
 
-        <!-- Content Tables Workspace Area -->
-        <div id="hubTablesWorkspace" style="display: none;"></div>
+            <h2>🌳 Garden Cloud Irrigation Hub Controller</h2>
 
+            <div class="tab-container-block">
+                <div class="tab-bar" id="tabBarContainer" style="display: none;"></div>
+                <div class="gauges-sub-bar" id="subGaugesContainer" style="display: none;">
+                    <div class="gauge-status-cell" id="masterBatteryCard"><span>MASTER</span><b id="masterAdcText" class="gauge-val-readout">-- ADC</b><meter id="masterMeter" min="0" max="1023" value="0"></meter></div>
+                    <div class="gauge-status-cell" id="cell_H0"><span>NODE 0</span><b id="txt_H0" class="gauge-val-readout">-- ADC</b><meter id="met0" min="0" max="1023" value="0"></meter></div>
+                    <div class="gauge-status-cell" id="cell_H1"><span>NODE 1</span><b id="txt_H1" class="gauge-val-readout">-- ADC</b><meter id="met1" min="0" max="1023" value="0"></meter></div>
+                    <div class="gauge-status-cell" id="cell_H2"><span>NODE 2</span><b id="txt_H2" class="gauge-val-readout">-- ADC</b><meter id="met2" min="0" max="1023" value="0"></meter></div>
+                    <div class="gauge-status-cell" id="cell_H3"><span>NODE 3</span><b id="txt_H3" class="gauge-val-readout">-- ADC</b><meter id="met3" min="0" max="1023" value="0"></meter></div>
+                </div>
+            </div>
+
+            <div id="hubTablesWorkspace" style="display: none;"></div>
+
+            <!-- Diagnostic Ticker Status Logger -->
         <!-- Diagnostic Ticker Status Logger -->
         <div id="terminalLog" style="background: #0a0a0a; color: #ff9900; font-family: monospace; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 12px; text-align: center; font-weight: bold; border: 1px solid #222; word-break: break-all; white-space: normal; line-height: 1.4;">
-            Last command: Awaiting Hardware Sync...
+            Last command: Security Verified. Sync Active.
         </div>
-    </div>
+    </div> <!-- Clocks panel div wrapper container -->
+</div> <!-- Clocks securedConsoleWorkspace master container -->
 
-    <!-- Core Scripts links -->
+    <!-- Core Local JavaScript Scripts Inclusion Links -->
     <script src="gateway_db_interface.js"></script>
     <script src="gateway_payload_parser.js"></script>
     <script src="gateway_master.js"></script>
