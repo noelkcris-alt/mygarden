@@ -189,8 +189,8 @@ function generateDynamicHtmlLayoutStructure() {
             workspaceHtml += `
                 <tr><td colspan="4" class="channel-header">Channel ${ch + 1}</td></tr>
                 <tr class="mode-row">
-                    <td>ON</td><td>OFF</td>
-                    <td colspan="2">
+                    <td>&nbsp;</td><td>ON</td><td>OFF</td>
+                    <td colspan="1">
                         <span id="lbl_E${hub}${ch}" class="mode-lbl lbl-auto">Auto</span>
                         <input type="range" id="E${hub}${ch}" min="0" max="2" value="1" ${disabledStateConstraintTag} onchange="window.processInstantModeSliderAutoSubmit(${hub}, ${ch}, this.value)">
                     </td>
