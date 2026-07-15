@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Garden Standalone Daily Switch Controller</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #121212; color: #e0e0e0; padding: 10px; margin: 0; font-size: 14px; }
+        .panel { max-width: 600px; margin: 0 auto; background: #1e1e1e; padding: 15px; border-radius: 8px; border: 1px solid #333; box-shadow: 0 4px 20px rgba(0,0,0,0.6); position: relative; }
+        h2 { color: #ffffff; text-align: center; margin-top: 5px; margin-bottom: 12px; font-weight: 500; font-size: 20px; border-bottom: 2px solid #00ff66; padding-bottom: 10px; }
+        
+        /* 🌟 SLEEK SINGLE-CELL TELEMETRY HOUSING DESIGN FOR ONE STANDALONE MCU */
+        .telemetry-row { background: #1a1a1a; border: 1px solid #3a3a3a; border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; margin-bottom: 15px; font-family: monospace; font-size: 13px; transition: all 0.3s ease; }
+        .gauge-val-readout { display: block; font-size: 13px; font-weight: bold; transition: color 0.3s ease; }
+        
+        /* Irrigation Grid Formatting Matrix */
+        table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 14px; background: #181818; }
+        td { border: 1px solid #2d2d2d; padding: 10px 6px; text-align: center; vertical-align: middle; }
+        .channel-header { background: #262626; color: #00ff66; font-weight: bold; text-align: left; padding-left: 12px; font-size: 13px; text-transform: uppercase; padding: 8px; }
+        .mode-row { background: #1f2d1f; }
+        
+        /* Input Component Parameter Wrappers */
+        input[type="time"] { background: #121212; color: #fff; border: 1px solid #444; padding: 4px; border-radius: 3px; font-family: monospace; font-size: 13px; width: 68px; text-align: center; }
+        input[type="time"]:focus { border-color: #00ff66; outline: none; }
+        input[type="range"] { width: 80px; cursor: pointer; accent-color: #00ff66; vertical-align: middle; }
+        .mode-lbl { font-weight: bold; font-size: 12px; min-width: 65px; display: inline-block; vertical-align: middle; }
+        .lbl-off { color: #ff3333; } .lbl-auto { color: #ffb700; } .lbl-on { color: #00ff66; }
+        
+        /* Action Elements */
+        button.submit-btn { background: #00ff66; color: #000; border: none; padding: 8px 4px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 11px; text-transform: uppercase; width: 100%; }
+        button.submit-btn:hover { background: #00cc52; }
+        hr { border: 0; border-top: 1px solid #333; margin: 15px 0; }
+        
+        /* HTML5 Meter Element Custom Webkit Styling Overrides */
+        meter { width: 100px; height: 10px; display: inline-block; border-radius: 2px; background: #111; border: none; -webkit-appearance: none; appearance: none; vertical-align: middle; margin-left: 10px; }
+        meter::-webkit-meter-bar { background: #111; border: none; border-radius: 2px; height: 10px; }
+        
+        /* Dynamic Accent Color Triggers matching your required tricolor blocks */
+        meter.meter-green::-webkit-meter-value { background: #00ff66 !important; box-shadow: 0 0 4px #00ff66; }
+        meter.meter-yellow::-webkit-meter-value { background: #ffcc00 !important; box-shadow: 0 0 4px #ffcc00; }
+        meter.meter-red::-webkit-meter-value { background: #ff3333 !important; box-shadow: 0 0 4px #ff3333; }
+        
+        /* LOCALIZED PROGRESS VALUE BAR PULSATING EFFECT EXCLUSIVELY FOR CRITICAL WARNINGS */
+        @keyframes meterValueCriticalPulse {
+            0% { background-color: #ff3333; box-shadow: 0 0 2px #ff3333; filter: brightness(1); }
+            50% { background-color: #550000; box-shadow: 0 0 10px #ff3333; filter: brightness(1.4); }
+            100% { background-color: #ff3333; box-shadow: 0 0 2px #ff3333; filter: brightness(1); }
+        }
+        meter.pulse-critical-bar::-webkit-meter-value {
+            animation: meterValueCriticalPulse 1.2s infinite ease-in-out !important;
+        }
+
+        /* Full Page Loading Splash Indicator Wall */
+        #loadingSplash { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #121212; display: flex; flex-direction: column; justify-content: center; align-items: center; z-index: 9999; font-weight: bold; font-family: monospace; color: #00ff66; font-size: 16px; }
+        .spinner { border: 3px solid #222; border-top: 3px solid #00ff66; border-radius: 50%; width: 35px; height: 35px; animation: spin 1s linear infinite; margin-bottom: 12px; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+
+    <!-- ⌛ SPLASH LOADING COVERS -->
+    <div id="loadingSplash">
+        <div class="spinner"></div>
+        <div>CONNECTING TO STANDALONE CONTROLLER...</div>
+    </div>
+
+    <div class="panel">
+        <!-- 🔑 TOP RIGHT LOGIN ACTION CONTAINER -->
+        <button id="globalAuthActionHeaderBtn" onclick="window.triggerAdminLoginPopupPrompt()" style="position: absolute; top: 15px; right: 15px; background: #00ff66; color: #000; border: none; padding: 6px 12px; font-weight: bold; border-radius: 4px; cursor: pointer; font-size: 11px; z-index: 10;">🔑 LOGIN</button>
+
+        <div style="text-align: center; margin-bottom: 10px; font-family: monospace; font-size: 13px; color: #aaa; margin-top: 5px;">
+            🖥️ Current Time: <span id="liveClockDisplay" style="color: #00ff66; font-weight: bold;">00:00:00 AM</span>
+        </div>
+
+        <h2>🌳 Standalone Switch Controller Dashboard</h2>
+
+        <!-- 🌟 SLEEK SYMMETRICAL TELEMETRY BAR ENCLOSES MCU READINGS WITHOUT SEPARATE CARD BLOCKS -->
+        <div class="telemetry-row" id="mcuTelemetryRow" style="display: none;">
+            <span style="font-weight: bold; color: #aaa;">🔋 CONTROLLER VOLTAGE:</span>
+            <div style="display: flex; align-items: center; gap: 5px;">
+                <b id="mcuAdcText" class="gauge-val-readout">-- ADC</b>
+                <meter id="mcuMeter" min="0" max="1023" value="0"></meter>
+            </div>
+        </div>
+
+        <!-- Content Tables Workspace Area -->
+        <!--div id="hubTablesWorkspace"></div-->
+		<div id="hubTablesWorkspace" style="display: none;"></div>
+
+
+        <!-- Diagnostic Ticker Status Logger -->
+        <div id="terminalLog" style="background: #0a0a0a; color: #ff9900; font-family: monospace; padding: 10px; border-radius: 5px; margin-top: 15px; font-size: 12px; text-align: center; font-weight: bold; border: 1px solid #222; word-break: break-all; white-space: normal; line-height: 1.4;">
+            Last command: Awaiting Hardware Sync...
+        </div>
+    </div>
+
+    <!-- Core Scripts loading links -->
+    <script src="garden_db_interface.js"></script>
+    <script src="garden_payload_parser.js"></script>
+    <script src="garden_master.js"></script>
+</body>
+</html>
