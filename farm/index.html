@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html>
+<title>4 Hubs 4 Channel Daily Switch Controller</title>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="icon" href="" type="image/x-icon"/>
+<style>
+body {font-family: Arial; background-color:#000;}
+caption {font-family:verdana;font-size:18px;}
+button {
+  background-color: #006600;
+  border-radius:10px;
+  border: none;
+  color: white;
+  padding: 8px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 12px;
+  margin: 4px 2px;
+}
+input[type="radio"]:disabled {background-color: #00a;}
+input[type="radio"] {
+	background-color: #ffd;
+    border-radius: 0px;
+    cursor: pointer;
+    display: inline-block;
+    height: 20px;
+    margin-right: 5px;
+    position: relative;
+    width: 22px;
+}
+input[type="radio"]:after {
+    background-color: #444;
+    border-radius: 25px;
+    content: '';
+    display: block;
+    height: 14px;
+    left: 2px;
+    position: relative;
+    top: 2px;
+    width: 14px;
+}
+input[type="radio"]:checked:after {
+    background-color: #6ff;
+}
+
+input {font-size:16px;font-weight:bold;border:2px solid #707000;}
+input:read-only {background-color: yellow;}
+#htab {width:92%;}
+.batt {font-size:10px;}
+
+/* Style the tab */
+.tab {
+  overflow: hidden;
+  border: 0px solid #ccc;
+  background-color: #00a;
+  max-width: 360px; margin: 0;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+  float: left;
+  border: none;
+  outline: none;
+  cursor: pointer;
+  padding: 2px 18px;
+  transition: 0.3s;
+  font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #00AA00;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  background-color: gold;
+  color: black;
+}
+
+/* Style the tab content */
+.tabcontent {
+  width:90%;
+  display: none;
+  padding: 6px 12px;
+  border: 0px solid #ccc;
+  border-top: none;
+}
+.on {background-color:green;}
+.off {background-color:red;}
+table {width:100%;border-collapse:collapse;
+  margin-bottom: 0;!important; /* Force the bottom margin to zero */
+  border-radius: 25px;
+  border: 0px solid #FFFFFF;
+  background-color: #00a;
+  padding: 7px; 
+  color:white;
+}
+meter {width:86%;}
+meter::-moz-meter-optimum-value {background: lightgreen;} 
+meter::-moz-meter-suboptimum-value{background:orange;}  
+meter::-moz-meter-sub-sub-optimum-value{background:red;}
+
+meter::-webkit-meter-bar {background: black;} /*background color of bar*/
+meter::-webkit-meter-optimum-value {background: yellow;}
+meter::-webkit-meter-suboptimum-value{background:cyan;}
+meter::-webkit-meter-even-less-good-value{background:blue;}
+
+.slider {
+  width: 50px; /* Full-width */
+appearance: none;
+background: #00ff00; /* Grey background */
+border-radius:4px;
+height: 8px; /* Specified height */
+  
+.slider::-moz-range-thumb {
+  width: 20px; /* Set a specific slider handle width */
+  height: 18px; /* Slider handle height */
+  background: #F00; /* Green background */
+  border-radius:10px;
+  cursor: pointer; /* Cursor on hover */
+}
+}
+hr {
+width:100%;
+text-align:left;
+height:20px;
+margin:0;
+background-color:gold;
+border-top-right-radius:6px;
+border-bottom-right-radius:6px;
+border-radius:6px;
+}
+hr.special{height:3px;background-color:white;}
+#apptitle {background-color: #00a;
+border-radius:10px;
+
+}
+</style>
+<script>
+icon ="data:image/png;base64,AAABAAEAICAAAAEACACoCAAAFgAAACgAAAAgAAAAQAAAAAEACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD/AEAA////AAAA/wD/AAAAAP//AIAA/wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBQUFBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAEBAQEBAQEBAQEBAQEBAQEBAQEBAQEBAAAAAAAAAAAAAQECAgICAgICAgICAgICAgICAgICAQEAAAAAAAAAAAABAQICAgICAgICAgICAgICAgICAgIBAQAAAAAAAAAAAAEBAgICAgICAgICAgICAgICAgICAgEBAAAAAAAAAAAAAQECAgICAgICAgICAgICAgICAgICAQEAAAAAAAAAAAABAQICAgICAgICAgICAgICAgICAgIBAQAAAAAAAAAAAAEBAgICAgICAgICAgICAgICAgICAgEBAAAAAAAAAAAAAQECAgICAgICAgICAgICAgICAgICAQEAAAAAAAAAAAABAQICAgICAgICAgICAgICAgICAgIBAQAAAAAAAAAAAAEBAgICAgICAgICAgICAgICAgICAgEBAAAAAAAAAAAAAQECAgICAgICAgICAgICAgICAgICAQEAAAAAAAAAAAABAQICAgICAgICAgICAgICAgICAgIBAQAAAAAAAAAAAAEBAgICAgICAgICAgICAgICAgICAgEBAAAAAAAAAAAAAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQEAAAAAAAAAAAABAQEBAQEBAQEBAQEBAQEBAQEBAQEBAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
+var link = document.querySelector("link[rel~='icon']");
+link.href = icon;
+
+started=false;
+WSdata="";
+mBatt=0;
+numHubs=4;
+numPins=4;
+numSkeds=4;
+enastr="";
+stat1="";
+
+var ena_text=['OFF','Auto','ON'];
+var ena_color=['red','White','Gold'];
+var askeds=[];
+time12="";
+
+base_url="https://sgp1.blynk.cloud/external/api/";
+token="token=qhP8Ca-InhAF-p5H7zOkpcVgDugg7Ti3";
+get_url=base_url+"get?"+token;
+update_url=base_url+"update?"+token;
+
+
+//-----------------
+function get_data(vpin){
+// get data from blynk server
+//-----------------
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+if (this.readyState == 4 && this.status == 200) {
+   // Typical action to be performed when the document is ready:
+   res=xhttp.responseText;
+	console.log("res=",res);
+   cmd=res.substring(0,1);
+   switch(cmd){
+   case "N":
+     console.log("New Client");
+	 putSched(res.substring(1));
+	 break;
+   case "b":
+	 console.log("Battery: ",res.substring(1));
+	 break;
+
+	
+   }
+   }
+};
+url=get_url+"&"+vpin;
+xhttp.open("GET", url, true);
+xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+xhttp.send();
+}
+
+//-----------------
+function send_data(mess,vpin,get){
+//-----------------
+var xhttp = new XMLHttpRequest();
+xhttp.onreadystatechange = function() {
+if (this.readyState == 4 && this.status == 200) {
+   // Typical action to be performed when the document is ready:
+   res=xhttp.responseText;
+   if (get) get_data(vpin);
+   }
+};
+//mess="T"+mess;
+//mess="test";
+console.log(mess);
+update_url=base_url+"update?"+token+"&"+vpin+"="+mess;
+url=update_url;
+console.log(url);
+//console.log("//{server_address}/external/api/update?token={token}&dataStreamId={id}&value={value}");
+xhttp.open("GET", url, true);
+
+xhttp.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
+xhttp.send();
+}
+
+
+//-------------------------
+function getCurTime(){
+// set the current time of the client from the web browser
+// for use of web browser current time
+//--------------------
+dt12=new Date();
+time12 = dt12.toLocaleTimeString("en-US", {hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+//console.log("Time=",time12);
+if (time12.substr(0,2)=="24") {time12="00"+time12.substr(2,3);}
+hh=time12.substr(0,2);
+mm=time12.substr(3,2);
+ss=time12.substr(6,2);
+nss=parseInt(ss);
+nhm=parseInt(hh)*60+parseInt(mm);
+if (started) checkSkeds("06:03");
+
+document.getElementById("ST").value=time12;
+}
+
+//----------------------------
+function checkSkeds(chm){
+//--------------------------
+for(var h=0;h<numHubs;h++){
+	for (var p=0;p<numPins;p++){
+		hp=""+h+p;
+		d="D"+hp;
+		r="E"+hp;
+		t0="T"+hp+"0";
+		t1="T"+hp+"1";
+		t2="T"+hp+"2";
+		t3="T"+hp+"3";
+		val=document.getElementById(r).value;
+		document.getElementById(d).style.color=ena_color[val];
+		chm0=document.getElementById(t0).value;
+		chm1=document.getElementById(t1).value;
+		chm2=document.getElementById(t2).value;
+		chm3=document.getElementById(t3).value;
+
+		//console.log(chm,chm0,chm1,chm2,chm3);
+		if(((chm>=chm0) && (chm<chm1)) || ((chm>=chm2) & (chm<chm3))) document.getElementById(d).style.color=ena_color[2];
+		else  document.getElementById(d).style.color=ena_color[1];
+		//console.log(d," is off");
+
+	}
+}
+}
+
+//------------------------------
+function upMBatt(level){
+//---------------------------------------
+mBatt=parseInt(level);
+}
+
+
+//-------------------------
+function setCurTime(){
+// set the current time of the client from the web browser
+//--------------------
+// set the current time
+dt12=new Date();
+time12 = dt12.toLocaleTimeString("en-US", {hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false});
+//console.log("Time=",time12);
+if (time12.substr(0,2)=="24") {time12="00"+time12.substr(2,3);}
+//document.getElementById("C11").value=time12;
+document.getElementById("ST").value=time12;
+// check the status of the timers
+//console.log(time12);
+chh=time12.substr(0,2);
+cmm=time12.substr(3,2);
+cTime=time12.replaceAll(":","");
+//console.log("cTime: ",cTime);
+toSend="T"+cTime;
+send_data(toSend,"V50");
+}
+
+
+//------------------------
+function loadFile(cmd) {
+//------------------------
+document.getElementById("sketch").innerText=cmd;
+setCurTime();
+}
+
+
+
+//--------------------------------
+function createtabs(numSlaves){
+//--------------------------------
+tab="&nbsp;\n"
+for (var h=0;h<numHubs;h++){
+  hub="Hub"+h;
+  shub="HUB "+(h+1);
+  tab+="<button id='butt"+h+"' ";
+  tab+="class='tablinks'";
+  tab+=" onclick='openTab(event,\""+hub+"\")'>";
+  tab+=shub+"</button>\n";
+
+}
+//console.log(tab);
+document.getElementById('tabcont').innerHTML=tab;
+}
+
+//-----------------------
+function ena_hubs(el) {
+// set hub all channels as 0,1,2
+// and send to socket
+//-----------------------
+elid=el.id;
+val=el.value;
+pid=elid.substr(0,2);
+hub=elid.substr(1,1);
+el.checked=false;
+// update the channels
+for (var h=0;h<4;h++){
+	for (var p=0;p<3;p++){
+		rid=pid+h+p;
+//	console.log("rid=",rid);
+	document.getElementById(rid).checked=(val==p);
+}
+}
+toSend="C"+elid.substr(1);
+//console.log("toSend=",toSend);
+Socket.send(toSend);
+
+}
+
+//-----------------------
+function ena_hub(el) {
+// click event
+//-----------------------
+elid=el.id;
+console.log(el.disabled);
+hub=elid.substr(1,1);
+pin=elid.substr(2,1);
+for (var x=0;x<3;x++){
+	rid="e"+hub+pin+x;
+	console.log(rid);
+	document.getElementById(rid).disabled=false;
+}
+
+val=el.value;
+toSend="E"+hub+pin+val;
+console.log("Ena_hub toSend=",toSend);
+el.disabled=true;
+send_data(toSend,"V49");
+}
+
+//------------------
+function ranger(el){
+// the slide swutch
+//------------------
+elid=el.id;
+//console.log("elid=",elid);
+val=el.value;
+cmd=elid.substr(0,1);
+hub=elid.substr(1,1);
+pin=elid.substr(2,1);
+tobj="ts"+elid.substr(1);
+document.getElementById(tobj).innerHTML=ena_text[val];
+toSend=hub+cmd+pin+val;
+//console.log("toSend=",toSend);
+send_data(toSend,"V49");
+if(cmd=="C"){ // just update the switches
+elt="E"+hub;
+for (var p=0;p<numPins;p++){
+	tobj=elt+p;
+//console.log("tobj",tobj);
+document.getElementById(tobj).value=val;
+};
+};
+}
+
+//--------------------------------
+function createskeds(numHubs,numPins){
+// just create the skeds no default values
+//--------------------------------
+	sk="";
+for (var h=0;h<numHubs;h++){
+	sk+="<div id='Hub"+h+"' class='tabcontent'>\n";
+	sk+="<table border=0 cellpadding=0 cellspacing=0>\n";
+	sk+="<head>";
+	sk+="<tr><th colspan=3>&nbsp;HUB"+(h+1)+"&nbsp;</th>";
+	sk+="<th colspan=1><input type='range' class='slider' id='C"+h+"' min='0' max='2' value=1 onchange='ranger(this);'/>&nbsp;<span id='ts"+h+"'>Auto</span>";
+	sk+="</th></tr>\n";
+	sk+="<tr><td colspan=4><hr class='special'></td></tr>\n";	
+	sk+="</head>";
+	for (var p=0;p<numPins;p++){
+		hp=""+h+p;
+		tbid="tb"+hp;
+		d="D"+hp;
+		t="T"+hp;
+		sk+="<tbody id='"+tbid+"'>\n";
+		sk+="<tr><th colspan=3 id='"+d+"'>Channel "+(p+1)+"</th>";
+		//sk+="<th colspan=2><input id='ena"+xy+"' type='checkbox' onchange='setdev(this);'>";
+		//sk+="<input type='range' class='slider' id='C"+xy+"' min='0' max='2' value=1 onchange='ranger(this);'/>&nbsp;<span id='ts"+xy"'>Auto</span>";
+		sk+="<th colspan=1><input type='range' class='slider' id='E"+hp+"' min='0' max='2' value=1 onchange='ranger(this);'/>&nbsp;<span id='ts"+hp+"'>Auto</span>";
+
+//		sk+="<input type='radio'  name='h"+xy+"' value='0' id='e"+xy+"0' onclick='ena_hub(this);'>OFF</input>";
+//		sk+="<input type='radio'  name='h"+xy+"' value='1' id='e"+xy+"1' onclick='ena_hub(this);' checked='checked'>Auto</input>";
+//		sk+="<input type='radio'  name='h"+xy+"' value='2' id='e"+xy+"2' onclick='ena_hub(this);'>ON</input>"; 
+		sk+="</th></tr>\n";
+		sk+="<tr><th></th><th class=on>ON</th><th colspan=1 class=off>OFF</th><td></td></tr>";
+		
+		sk+="<tr><th>S1</th><th><input id='"+t+"0' type=time value='06:00' /></th><th><input id='"+t+"1' type=time value='06:01'  /></th><\n";
+		sk+="<th rowspan=2><button id='S"+hp+"' onclick='sendChannelSked(this);'>Submit</th>\n";
+		sk+="<tr><th>S2</th><th><input id='"+t+"2' type=time value='17:00'/></th><th><input id='"+t+"3' type=time value='17:01'/></th></tr>\n";
+
+		sk+="</tbody>\n";
+	}
+//sk+="<tr><td colspan=4 class=batt>&nbsp;Batt&nbsp;<meter id='met"+h+"'  min='740' low='800' optimum='900' high='1000' max='1023' value=0></meter></td></tr>\n";
+sk+="<tr><td colspan=4><hr id='met"+h+"' /></td><td class=batt>&#x1F5F2;Batt</td></tr>\n";
+sk+="</table>\n";
+sk+="</div>\n";
+
+}
+//console.log(sk);
+sk+="<p id='sketch' style='font-size:8px;vertical-align: top;color:white;'>sketch.ino</p>";
+sk+="<img style='display:block; width:80px;height:80px;' id='img0' onclick='showBatt();' />";
+document.getElementById('skeds').innerHTML=sk;
+document.getElementById('img0').src=icon;
+
+} //createskeds()
+
+function showBatt(){
+console.log("Show Batts");
+send_data("b","V49",true);
+
+}
+
+//----------------------------
+function sendChannelSked(el){
+// cmd="K" out  √
+//----------------------------
+console.log(el.id);
+//get trigger id
+//console.log(el.id);
+skeds="";
+hub=el.id.substr(1,1);
+r=el.id.substr(2,1);
+indx=0;
+lastnhm=0;
+for (var s=0;s<4;s++){ //s
+  obj="T"+hub+r+s;
+  chhmm=document.getElementById(obj).value;
+  chh=chhmm.substr(0,2);
+  cmm=chhmm.substr(3,2);
+  chh=chh.padStart(2,"0"); 
+  cmm=cmm.padStart(2,"0"); 
+  skeds+=chh+cmm;
+}
+toSend=hub+"K"+r+skeds; 
+console.log("sendChannelSked: Skeds=",toSend);
+send_data(toSend,"V49");
+
+} // eof sendChannelSked()
+
+//----------------------------------
+function ena_channels(cdevs){
+// format xHHH xHHH xHHH xHHH
+// updates client's enabled channels
+// called by putSched() 
+//----------------------------------
+//console.log(cdevs);
+idx=0;
+for (var z=0;z<numHubs;z++){
+	for (var y=0;y<numPins;y++){
+		cval=cdevs.substr(idx,1);
+		rid="E"+z+y;
+		document.getElementById(rid).value=cval;
+		idx++;
+		}
+}
+}
+
+//----------------------------
+function putSched(stat){
+// get status from mcu when logging in
+// format:word device status  1111 1111 1111 1111 =FFFF|sckeds
+// 
+stat0="1111222200001111";
+stat0+="1e01e243843916916a3fd3fe16a16b3fe3ff16b16c3ff40016916a3fd3fe16a16b3fe3ff16b16c3ff40016c16d40040116a16b3fe3ff16b16c3ff40016c16d40040116d16e40140216b16c3ff40016c16d40040116d16e40140216e16f402403"
+//----------------------------
+stat1=stat;
+//console.log("stat1=",stat1);
+//ena_ch=stat1.substr(0,4);
+pos=numPins*numHubs;
+enastr=stat1.substr(0,pos-1);
+//console.log("enastr=",enastr);
+pos2=numHubs*pos;
+skeds=stat1.substr(pos,pos2*3);
+//console.log("skeds=",skeds);
+//cbatt=stat1.substring(stat1.lastIndexOf("|")+1);
+//console.log("cbat=",cbatt);
+//upBatt(cbatt);
+ena_channels(enastr);
+hstr=stat1;// .substr(0);
+//console.log("hstr=",hstr);
+askeds.length=0;
+indx=0;
+for (var h=0;h<numHubs;h++){
+	for (var p=0;p<numPins;p++){
+		for (var s=0;s<numSkeds;s++) {
+			tid="T"+h+p+s;
+			val=Number("0x"+skeds.substr(indx,3));
+			hh=parseInt(val/60);
+			mm=val%60;
+			chh=hh.toString().padStart(2,"0");
+			cmm=mm.toString().padStart(2,"0");
+			chm=chh+":"+cmm;
+//			console.log(h,p,s,"val=",val,"tid=",tid,"hh=",chh,"mm=",cmm)
+			document.getElementById(tid).value=chm;
+			indx+=3;
+}
+}
+}
+if (!started) setMCUTime(time12); // send the current time to MCU
+} //putScheds
+//------------------------------
+function upBatt(cbatt){
+///nnnnNNNNnnnnNNNNmmmm -input
+//-------------------------------
+//console.log("cbatt=",cbatt);
+maxadc=1024;
+minadc=819;
+maxDCV=15;
+range=maxadc-minadc
+
+for (var h=0;h<numHubs+1;h++){
+//cadc=Number(cbatt.substr(h*4,4));
+cadc=cbatt.substr(h*4,4);
+//nadc=parseInt(cadc);
+
+pcmd=cadc/maxadc;
+hrpercent=(cadc-minadc)/(range)*100;
+tobj=document.getElementById("met"+h);
+tobj.style.backgroundColor="#77FF77";
+bval=Number(cbatt.substr(h*4,4))-130;
+//console.log("pcmd=",pcmd.toFixed(2));
+if (pcmd<0.83) tobj.style.backgroundColor="gold";
+if (pcmd<0.81) tobj.style.backgroundColor="orange";
+if (pcmd<0.78) tobj.style.backgroundColor="red";
+
+//console.log(cbatt.substr(h*3,3)," bval=",h,bval);
+sval=bval.toString();
+ntitle=16/1024*bval;
+ctitle=ntitle.toString().substr(0,4)+"V";
+//console.log("Batt=",h,sval);
+//tobj.width=hrpercent+"%";
+tobj.style.width=pcmd*100+"%";
+tobj.value=sval;
+tobj.title=ctitle;
+//console.log("met4",document.getElementById("met4").value);
+}
+/*
+bval=Number("0x"+cbatt.substr(h*3,3))-130;
+sval=bval.toString();
+tobj="met";
+ntitle=16/1024*bval;
+console.log("mval=",sval);
+document.getElementById(tobj).value=sval;
+document.getElementById(tobj).title=ctitle;
+*/
+
+}
+
+
+</script>
+</head>
+<body onload="init();">
+<center>
+<table id=htab border=0 class=control> 
+<caption id='apptitle'>4 Hubs 4 Channel Daily Switch Controller</caption>
+<tr><th colspan=2>Time:&nbsp;&nbsp;&nbsp;&nbsp;<input id=ST type=time readonly /></th><th>Batt</th></tr>
+<tr><td colspan=2 style='width:380px;'><div id='tabcont' class="tab"></div></td></tr>
+<tfoot>
+<tr><td colspan=2><hr id='met4'></td><td class='batt'>&#x1F5F2;Batt</td></tr>
+<!--tr><td>&nbsp;</td><td><hr id='met4'></td></tr-->
+</tfoot>
+</table>
+<div id='skeds'>
+</div>
+</center>
+<script>
+numHubs=4;
+numLeds=4;
+
+//--------------------------
+function chkskeds(){
+//------------------------
+console.log("checking");
+for (var z=0;z<64;z++){
+	console.log(askeds[z]);
+}
+}
+//-----------------------------
+function setMCUTime(ctime) {
+// change the current time of the device
+// cmd = T output
+//-----------------------------
+started=true;
+toSend=ctime.replace(/:/g,"");
+Socket.send("T"+toSend);
+}
+
+
+//----------------------
+function init(){
+//----------------------
+getCurTime(); // locally
+get_data("V50");
+createtabs(numHubs);
+createskeds(numHubs,numPins);
+document.getElementById("butt0").click();
+//loadSked(); // from mcu
+//putSched(); // from mcu
+console.log("time12=",time12);
+send_data(time12,"V49");
+setMCUTime(time12); 
+
+}
+function openTab(evt, TabName) {
+  var i, tabcontent, tablinks;
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+  document.getElementById(TabName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+vv=setInterval(getCurTime,1000);
+</script>
+</body>
+</html> 
